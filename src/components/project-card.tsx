@@ -1,31 +1,31 @@
-import { Badge } from "@/components/ui/badge";
+import { Badge } from '@/components/ui/badge'
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { cn } from "@/lib/utils";
-import Image from "next/image";
-import Link from "next/link";
-import Markdown from "react-markdown";
+} from '@/components/ui/card'
+import { cn } from '@/lib/utils'
+import Image from 'next/image'
+import Link from 'next/link'
+import Markdown from 'react-markdown'
 
 interface Props {
-  title: string;
-  href?: string;
-  description: string;
-  dates: string;
-  tags: readonly string[];
-  link?: string;
-  image?: string;
-  video?: string;
+  title: string
+  href?: string
+  description: string
+  dates: string
+  tags: readonly string[]
+  link?: string
+  image?: string
+  video?: string
   links?: readonly {
-    icon: React.ReactNode;
-    type: string;
-    href: string;
-  }[];
-  className?: string;
+    icon: React.ReactNode
+    type: string
+    href: string
+  }[]
+  className?: string
 }
 
 export function ProjectCard({
@@ -43,12 +43,12 @@ export function ProjectCard({
   return (
     <Card
       className={
-        "flex flex-col overflow-hidden border hover:shadow-lg transition-all duration-300 ease-out h-full"
+        'flex flex-col overflow-hidden border hover:shadow-lg transition-all duration-300 ease-out h-full'
       }
     >
       <Link
-        href={href || "#"}
-        className={cn("block cursor-pointer", className)}
+        href={href || '#'}
+        className={cn('block cursor-pointer', className)}
       >
         {video && (
           <video
@@ -73,7 +73,7 @@ export function ProjectCard({
           <CardTitle className="mt-1 text-base">{title}</CardTitle>
           <time className="font-sans text-xs">{dates}</time>
           <div className="hidden font-sans text-xs underline print:visible">
-            {link?.replace("https://", "").replace("www.", "").replace("/", "")}
+            {link?.replace('https://', '').replace('www.', '').replace('/', '')}
           </div>
           <Markdown className="prose max-w-full text-pretty font-sans text-xs text-muted-foreground dark:prose-invert">
             {description}
@@ -110,5 +110,5 @@ export function ProjectCard({
         )}
       </CardFooter>
     </Card>
-  );
+  )
 }

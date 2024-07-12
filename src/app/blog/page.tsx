@@ -1,16 +1,16 @@
-import BlurFade from "@/components/magicui/blur-fade";
-import { getBlogPosts } from "@/data/blog";
-import Link from "next/link";
+import BlurFade from '@/components/magicui/blur-fade'
+import { getBlogPosts } from '@/data/blog'
+import Link from 'next/link'
 
 export const metadata = {
-  title: "Blog",
-  description: "My thoughts on software development, life, and more.",
-};
+  title: 'Blog',
+  description: 'My thoughts on software development, life, and more.',
+}
 
-const BLUR_FADE_DELAY = 0.04;
+const BLUR_FADE_DELAY = 0.04
 
 export default async function BlogPage() {
-  const posts = await getBlogPosts();
+  const posts = await getBlogPosts()
 
   return (
     <section>
@@ -22,9 +22,9 @@ export default async function BlogPage() {
           if (
             new Date(a.metadata.publishedAt) > new Date(b.metadata.publishedAt)
           ) {
-            return -1;
+            return -1
           }
-          return 1;
+          return 1
         })
         .map((post, id) => (
           <BlurFade delay={BLUR_FADE_DELAY * 2 + id * 0.05} key={post.slug}>
@@ -42,5 +42,5 @@ export default async function BlogPage() {
           </BlurFade>
         ))}
     </section>
-  );
+  )
 }

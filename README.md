@@ -3,6 +3,7 @@
 </div> -->
 
 > This portfolio is using the template provided by [Magic UI](https://magicui.design/)
+>
 > Big Thanks to [Dillion](https://github.com/dillionverma) for creating this amazing portolio 🚀
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fandostronaut%2Fandostronaut.com)
