@@ -1,8 +1,9 @@
 'use client'
 
-import { cn } from '@/lib/utils'
-import { AnimatePresence, motion, Variants } from 'framer-motion'
 import { useMemo } from 'react'
+import { AnimatePresence, motion, Variants } from 'framer-motion'
+
+import { cn } from '@/lib/utils'
 
 interface BlurFadeTextProps {
   text: string

@@ -1,9 +1,11 @@
-import { getPost } from '@/data/blog'
-import { DATA } from '@/data/resume'
-import { formatDate } from '@/lib/utils'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
+
+import { getPost } from '@/data/blog'
+import { DATA } from '@/data/resume'
+
+import { formatDate } from '@/lib/utils'
 
 export async function generateMetadata({
   params,
