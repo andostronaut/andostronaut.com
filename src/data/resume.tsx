@@ -9,7 +9,7 @@ export const DATA = {
   location: 'Antananarivo, MG',
   locationLink: 'https://www.google.com/maps/place/antananarivo',
   description:
-    "I'm a passionate software engineer with a strong background in full stack development and open-source contributions. I specialize in using Next.js, React, TypeScript, and Deno to build scalable and efficient web applications.",
+    "I'm a full stack developer, open source enthusiast, and community builder. My experience includes leading workshops on AI, showcasing my versatility and commitment to the tech field.",
   skills: [
     'React',
     'Next.js',
