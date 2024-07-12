@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 import { Dock, DockIcon } from '@/components/magicui/dock'
 import { ModeToggle } from '@/components/mode-toggle'
 import { buttonVariants } from '@/components/ui/button'
@@ -7,9 +9,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+
 import { DATA } from '@/data/resume'
+
 import { cn } from '@/lib/utils'
-import Link from 'next/link'
 
 export default function Navbar() {
   return (
