@@ -1,0 +1,17 @@
+name: pull-request
+
+on:
+  push:
+    branches-ignore:
+      - main
+
+jobs:
+  create-pull-request:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: jascodes/pr-branch-action@1.0.3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          PULL_REQUEST_BRANCH: main
+          PULL_REQUEST_TITLE: ${{ github.event.commits[0].message }}
