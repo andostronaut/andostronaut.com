@@ -1,4 +1,4 @@
-import { Icons } from '../components/icons'
+import { Icons } from '@/components/icons'
 import { CodeIcon, HomeIcon } from 'lucide-react'
 
 export const DATA = {
