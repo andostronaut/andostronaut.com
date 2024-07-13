@@ -1,4 +1,4 @@
-import { Icons } from '@/components/icons'
+import { Icons } from '../components/icons'
 import { CodeIcon, HomeIcon } from 'lucide-react'
 
 export const DATA = {
@@ -9,7 +9,7 @@ export const DATA = {
   location: 'Antananarivo, MG',
   locationLink: 'https://www.google.com/maps/place/antananarivo',
   description:
-    "I'm a full stack developer, open source enthusiast, and community builder. My experience includes leading workshops on AI, showcasing my versatility and commitment to the tech field.",
+    "I'm a software developer, open source enthusiast, and community builder. My experience includes leading workshops on AI, showcasing my versatility and commitment to the tech field.",
   skills: [
     'React',
     'Next.js',
