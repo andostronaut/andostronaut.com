@@ -56,9 +56,9 @@ export default function Page() {
                   Explore my latest creations and open-source projects.
                 </h2>
                 <p className="text-muted-foreground md:text-md/relaxed lg:text-base/relaxed xl:text-md/relaxed">
-                  I&apos;ve worked on a variety of projects, from simple
-                  websites to complex web applications. Here are a few of my
-                  favorites.
+                  I&apos;ve participated in the conception and development of a
+                  range of projects, including libraries, npm packages, and
+                  complex web applications. Here are a few of my favorites.
                 </p>
               </div>
             </div>
