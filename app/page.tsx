@@ -1,12 +1,12 @@
 import Link from 'next/link'
 import Markdown from 'react-markdown'
 
-import BlurFade from '../components/magicui/blur-fade'
-import BlurFadeText from '../components/magicui/blur-fade-text'
-import { ProjectCard } from '../components/project-card'
-import { Badge } from '../components/ui/badge'
+import BlurFade from '@/components/magicui/blur-fade'
+import BlurFadeText from '@/components/magicui/blur-fade-text'
+import { ProjectCard } from '@/components/project-card'
+import { Badge } from '@/components/ui/badge'
 
-import { DATA } from '../data/resume'
+import { DATA } from '@/data/resume'
 
 const BLUR_FADE_DELAY = 0.04
 
