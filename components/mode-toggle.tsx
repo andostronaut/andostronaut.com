@@ -10,6 +10,7 @@ export function ModeToggle() {
 
   return (
     <Button
+      aria-label="toggle-theme"
       variant="ghost"
       type="button"
       size="icon"
