@@ -96,15 +96,14 @@ export default function Page() {
                 Get in Touch
               </h2>
               <p className="mx-auto max-w-[600px] text-muted-foreground md:text-md/relaxed lg:text-base/relaxed xl:text-md/relaxed">
-                Want to chat? Just shoot me a dm{' '}
+                Want to connect? Send me a{' '}
                 <Link
                   href={DATA.contact.social.X.url}
-                  className="text-blue-500 hover:underline"
+                  className="text-black underline font-semibold hover:underline dark:text-white"
                 >
-                  with a direct question on twitter
-                </Link>{' '}
-                and I&apos;ll respond whenever I can. I will ignore all
-                soliciting.
+                  direct message on X
+                </Link>
+                , and I&apos;ll make sure to get back to you.
               </p>
             </div>
           </BlurFade>
