@@ -1,8 +1,8 @@
 import Link from 'next/link'
 
-import BlurFade from '@/components/magicui/blur-fade'
+import BlurFade from '../../components/magicui/blur-fade'
 
-import { getBlogPosts } from '@/data/blog'
+import { getBlogPosts } from '../../data/blog'
 
 export const metadata = {
   title: 'Blog',
