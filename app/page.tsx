@@ -32,22 +32,15 @@ export default function Page() {
       </section>
       <section id="about">
         <BlurFade delay={BLUR_FADE_DELAY * 4}>
-          <Markdown className="prose max-w-full text-pretty font-sans text-md text-muted-foreground dark:prose-invert text-center">
+          <Markdown className="prose max-w-full text-pretty font-sans text-md text-muted-foreground dark:prose-invert">
             {DATA.description}
           </Markdown>
         </BlurFade>
-        <div className="flex flex-wrap gap-1 mt-4 justify-center">
-          {DATA.skills.map((skill, id) => (
-            <BlurFade key={skill} delay={BLUR_FADE_DELAY * 10 + id * 0.05}>
-              <Badge key={skill}>{skill}</Badge>
-            </BlurFade>
-          ))}
-        </div>
       </section>
       <section id="projects">
         <div className="space-y-12 w-full py-12">
           <BlurFade delay={BLUR_FADE_DELAY * 11}>
-            <div className="flex flex-col items-center justify-center space-y-4 text-center">
+            <div className="flex flex-col items-center justify-center space-y-4">
               <div className="space-y-2">
                 <div className="inline-block rounded-lg bg-foreground text-background px-3 py-1 text-sm">
                   My Projects
@@ -86,7 +79,7 @@ export default function Page() {
         </div>
       </section>
       <section id="contact">
-        <div className="grid items-center justify-center gap-4 px-4 text-center md:px-6 w-full py-12">
+        <div className="grid w-full py-12">
           <BlurFade delay={BLUR_FADE_DELAY * 16}>
             <div className="space-y-3">
               <div className="inline-block rounded-lg bg-foreground text-background px-3 py-1 text-sm">
@@ -95,11 +88,11 @@ export default function Page() {
               <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
                 Get in Touch
               </h2>
-              <p className="mx-auto max-w-[600px] text-muted-foreground md:text-md/relaxed lg:text-base/relaxed xl:text-md/relaxed">
-                Want to connect? Send me a{' '}
+              <p className="mx-auto text-muted-foreground md:text-md/relaxed lg:text-base/relaxed xl:text-md/relaxed">
+                Want to connect? Send me a
                 <Link
                   href={DATA.contact.social.X.url}
-                  className="text-black underline font-semibold hover:underline dark:text-white"
+                  className="text-black underline font-semibold hover:underline dark:text-white ml-1"
                 >
                   direct message on X
                 </Link>
