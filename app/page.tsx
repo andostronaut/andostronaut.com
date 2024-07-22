@@ -4,7 +4,6 @@ import Markdown from 'react-markdown'
 import BlurFade from '@/components/magicui/blur-fade'
 import BlurFadeText from '@/components/magicui/blur-fade-text'
 import { ProjectCard } from '@/components/project-card'
-import { Badge } from '@/components/ui/badge'
 
 import { DATA } from '@/data/resume'
 

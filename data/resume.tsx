@@ -71,7 +71,7 @@ export const DATA = {
         {
           type: 'Source',
           href: 'https://github.com/kinotio/gelda',
-          icon: <Icons.github className="size-3" />,
+          icon: 'Github',
         },
       ],
       image: '/gelda.png',
@@ -96,7 +96,7 @@ export const DATA = {
         {
           type: 'Source',
           href: 'https://github.com/kinotio/drowser-studio',
-          icon: <Icons.github className="size-3" />,
+          icon: 'Github',
         },
       ],
       image: '/drowser-studio.png',
@@ -114,7 +114,7 @@ export const DATA = {
         {
           type: 'Source',
           href: 'https://github.com/andostronaut/drowser',
-          icon: <Icons.github className="size-3" />,
+          icon: 'Github',
         },
       ],
       image: '/drowser.png',
@@ -132,7 +132,7 @@ export const DATA = {
         {
           type: 'Source',
           href: 'https://github.com/andostronaut/cocli',
-          icon: <Icons.github className="size-3" />,
+          icon: 'Github',
         },
       ],
       image: '/cocli.gif',
