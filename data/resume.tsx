@@ -1,5 +1,6 @@
-import { Icons } from '@/components/icons'
 import { CodeIcon, HomeIcon } from 'lucide-react'
+
+import { Icons } from '@/components/icons'
 
 export const DATA = {
   name: 'Ando RAMANAMIHANTA',
@@ -15,35 +16,31 @@ export const DATA = {
     { href: '#', icon: CodeIcon, label: 'Projects' },
   ],
   contact: {
-    email: 'me@andostronaut.com',
+    email: 'hi@andostronaut.com',
     tel: '+261329974365',
     social: {
       GitHub: {
         name: 'GitHub',
         url: 'https://dub.sh/70tsoUD',
         icon: Icons.github,
-
         navbar: true,
       },
       LinkedIn: {
         name: 'LinkedIn',
         url: 'https://dub.sh/OLcaELQ',
         icon: Icons.linkedin,
-
         navbar: true,
       },
       X: {
         name: 'X',
         url: 'https://dub.sh/jF9lEEb',
         icon: Icons.x,
-
         navbar: true,
       },
       email: {
         name: 'Send Email',
-        url: 'mailto:me@andostronaut.com',
+        url: 'mailto:hi@andostronaut.com',
         icon: Icons.email,
-
         navbar: false,
       },
     },
