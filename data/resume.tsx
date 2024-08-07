@@ -9,8 +9,16 @@ export const DATA = {
   url: 'https://andostronaut.com',
   location: 'Antananarivo, MG',
   locationLink: 'https://www.google.com/maps/place/antananarivo',
-  description:
-    "I'm a software developer, open source enthusiast, and community builder. My experience includes leading workshops on AI, showcasing my versatility and commitment to the tech field.",
+  description: 'description',
+  keywords: [
+    'Open Source',
+    'Developer',
+    'Open-Sourcer',
+    'OSS',
+    'Contributor',
+    'Software Developer',
+    'Software Engineer',
+  ],
   navbar: [
     { href: '/', icon: HomeIcon, label: 'Home' },
     { href: '#', icon: CodeIcon, label: 'Projects' },
@@ -136,4 +144,4 @@ export const DATA = {
       video: '',
     },
   ],
-} as const
+}
