@@ -5,13 +5,17 @@ import BlurFade from '@/components/magicui/blur-fade'
 import BlurFadeText from '@/components/magicui/blur-fade-text'
 import { ProjectCard } from '@/components/project-card'
 
+import { getScopedI18n } from '@/locales/lib/server'
+
 import { DATA } from '@/data/resume'
 
 const BLUR_FADE_DELAY = 0.04
 
-export default function Page() {
+export default async function Page() {
+  const translate = await getScopedI18n('global')
+
   return (
-    <main className="flex flex-col min-h-[100dvh] space-y-10">
+    <div className="flex flex-col min-h-[100dvh] space-y-10">
       <section id="hero">
         <div className="mx-auto w-full max-w-2xl space-y-8">
           <div className="gap-2 flex justify-between">
@@ -32,7 +36,7 @@ export default function Page() {
       <section id="about">
         <BlurFade delay={BLUR_FADE_DELAY * 4}>
           <Markdown className="prose max-w-full text-pretty font-sans text-md text-muted-foreground dark:prose-invert">
-            {DATA.description}
+            {translate(DATA.description as keyof typeof translate)}
           </Markdown>
         </BlurFade>
       </section>
@@ -42,12 +46,10 @@ export default function Page() {
             <div className="flex flex-col items-center justify-center space-y-4">
               <div className="space-y-2">
                 <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
-                  Explore my latest creations and open-source projects.
+                  {translate('projects.intro')}
                 </h2>
                 <p className="text-muted-foreground md:text-md/relaxed lg:text-base/relaxed xl:text-md/relaxed">
-                  I&apos;ve participated in the conception and development of a
-                  range of projects, including libraries, npm packages, and
-                  complex web applications. Here are a few of my favorites.
+                  {translate('projects.about')}
                 </p>
               </div>
             </div>
@@ -79,22 +81,22 @@ export default function Page() {
           <BlurFade delay={BLUR_FADE_DELAY * 16}>
             <div className="space-y-3">
               <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
-                Get in Touch
+                {translate('contact.get_in_touch')}
               </h2>
               <p className="mx-auto text-muted-foreground md:text-md/relaxed lg:text-base/relaxed xl:text-md/relaxed">
-                Want to connect? Send me a
+                {translate('contact.want')}
                 <Link
                   href={DATA.contact.social.X.url}
                   className="text-black underline font-semibold hover:underline dark:text-white ml-1"
                 >
-                  direct message on X
+                  {translate('contact.direct_message')}
                 </Link>
-                , and I&apos;ll make sure to get back to you.
+                {translate('contact.back')}
               </p>
             </div>
           </BlurFade>
         </div>
       </section>
-    </main>
+    </div>
   )
 }

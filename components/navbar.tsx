@@ -13,6 +13,7 @@ import {
 import { DATA } from '@/data/resume'
 
 import { cn } from '@/lib/utils'
+import { LocalToggle } from './locale-toggle'
 
 export default function Navbar() {
   return (
@@ -64,6 +65,17 @@ export default function Navbar() {
               </Tooltip>
             </DockIcon>
           ))}
+        <Separator orientation="vertical" className="h-full py-2" />
+        <DockIcon>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <LocalToggle />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Locale</p>
+            </TooltipContent>
+          </Tooltip>
+        </DockIcon>
         <Separator orientation="vertical" className="h-full py-2" />
         <DockIcon>
           <Tooltip>
