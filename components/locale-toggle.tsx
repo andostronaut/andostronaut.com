@@ -34,7 +34,6 @@ export const LocalToggle = () => {
         <Button variant="ghost" size="sm">
           <div className="flex items-center gap-2">
             <LanguagesIcon className="h-5 w-5" />
-            <span className="block lg:hidden">{currentLocale}</span>
           </div>
           <span className="sr-only">Change Locale</span>
         </Button>
