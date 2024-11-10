@@ -23,12 +23,12 @@ const RootLayout = ({
       <Script
         async
         src="https://analytics.andostronaut.com/script.js"
-        data-website-id="a6bab58e-6815-4acd-967d-1f0c4a7a285b"
+        data-website-id="f49f1439-5f47-48a6-ad0d-a88087c0e959"
       />
       <body
         className={cn(
           'min-h-screen bg-background font-sans antialiased',
-          inter.variable
+          inter.variable,
         )}
       >
         {children}
