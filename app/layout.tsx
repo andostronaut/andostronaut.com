@@ -23,7 +23,7 @@ const RootLayout = ({
       <Script
         async
         src="https://analytics.andostronaut.com/script.js"
-        data-website-id="f49f1439-5f47-48a6-ad0d-a88087c0e959"
+        data-website-id="dc73976e-d13c-490b-adbf-c8cc78433eeb"
       />
       <body
         className={cn(
