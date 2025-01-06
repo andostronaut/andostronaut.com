@@ -75,7 +75,7 @@ export const DATA = {
       links: [
         {
           type: 'Source',
-          href: 'https://github.com/kinotio/gelda',
+          href: 'https://gelda.kinotio.io',
           icon: 'Github',
         },
       ],
@@ -100,7 +100,7 @@ export const DATA = {
       links: [
         {
           type: 'Source',
-          href: 'https://github.com/kinotio/drowser-studio',
+          href: 'https://drowser.kinotio.io/studio',
           icon: 'Github',
         },
       ],
@@ -118,7 +118,7 @@ export const DATA = {
       links: [
         {
           type: 'Source',
-          href: 'https://github.com/andostronaut/drowser',
+          href: 'https://github.com/kinotio/drowser',
           icon: 'Github',
         },
       ],
