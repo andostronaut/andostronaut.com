@@ -1,19 +1,13 @@
 import Link from 'next/link'
 import Markdown from 'react-markdown'
-
 import BlurFade from '@/components/magicui/blur-fade'
 import BlurFadeText from '@/components/magicui/blur-fade-text'
 import { ProjectCard } from '@/components/project-card'
-
-import { getScopedI18n } from '@/locales/lib/server'
-
 import { DATA } from '@/data/resume'
 
 const BLUR_FADE_DELAY = 0.04
 
 export default async function Page() {
-  const translate = await getScopedI18n('global')
-
   return (
     <div className="flex flex-col min-h-[100dvh] space-y-10">
       <section id="hero">
@@ -36,7 +30,9 @@ export default async function Page() {
       <section id="about">
         <BlurFade delay={BLUR_FADE_DELAY * 4}>
           <Markdown className="prose max-w-full text-pretty font-sans text-md text-muted-foreground dark:prose-invert">
-            {translate(DATA.description as keyof typeof translate)}
+            I'm a software developer, open source enthusiast, and community
+            builder. My experience includes leading workshops on AI, showcasing
+            my versatility and commitment to the tech field.
           </Markdown>
         </BlurFade>
       </section>
@@ -46,10 +42,12 @@ export default async function Page() {
             <div className="flex flex-col items-center justify-center space-y-4">
               <div className="space-y-2">
                 <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
-                  {translate('projects.intro')}
+                  Explore my latest creations and open-source projects.
                 </h2>
                 <p className="text-muted-foreground md:text-md/relaxed lg:text-base/relaxed xl:text-md/relaxed">
-                  {translate('projects.about')}
+                  I've participated in the conception and development of a range
+                  of projects, including libraries, npm packages, and complex
+                  web applications. Here are a few of my favorites.
                 </p>
               </div>
             </div>
@@ -81,17 +79,17 @@ export default async function Page() {
           <BlurFade delay={BLUR_FADE_DELAY * 16}>
             <div className="space-y-3">
               <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
-                {translate('contact.get_in_touch')}
+                Get in Touch
               </h2>
               <p className="mx-auto text-muted-foreground md:text-md/relaxed lg:text-base/relaxed xl:text-md/relaxed">
-                {translate('contact.want')}
+                Want to connect? Send me a
                 <Link
                   href={DATA.contact.social.X.url}
                   className="text-black underline font-semibold hover:underline dark:text-white ml-1"
                 >
-                  {translate('contact.direct_message')}
+                  direct message on X
                 </Link>
-                {translate('contact.back')}
+                , and I'll make sure to get back to you.
               </p>
             </div>
           </BlurFade>
