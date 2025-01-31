@@ -14,12 +14,7 @@ export default async function Page() {
 
               <div className="mt-9 flex gap-4">
                 {DATA.contact.social.map((s) => (
-                  <Link
-                    key={s.name}
-                    href={s.url}
-                    className="text-sm font-sans"
-                    target="_blank"
-                  >
+                  <Link key={s.name} href={s.url} className="text-sm font-sans">
                     <s.icon className="size-4" />
                   </Link>
                 ))}
