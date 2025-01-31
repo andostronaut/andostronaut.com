@@ -52,6 +52,11 @@ export const DATA = {
         url: 'mailto:hi@andostronaut.com',
         icon: Icons.email,
       },
+      {
+        name: 'Blog',
+        url: '/blog',
+        icon: Icons.blog,
+      },
     ],
   },
   projects: [
