@@ -7,7 +7,7 @@ import remarkParse from 'remark-parse'
 import remarkRehype from 'remark-rehype'
 import { unified } from 'unified'
 
-type Metadata = {
+export type Metadata = {
   title: string
   publishedAt: string
   summary: string
@@ -59,7 +59,7 @@ async function getAllPosts(dir: string) {
         slug,
         source,
       }
-    })
+    }),
   )
 }
 
