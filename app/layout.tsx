@@ -6,7 +6,6 @@ import { cn } from '@/lib/utils'
 import { DATA } from '@/data/resume'
 import { ThemeProvider } from '@/components/theme-provider'
 import { TooltipProvider } from '@/components/ui/tooltip'
-import Navbar from '@/components/navbar'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -78,7 +77,6 @@ const Layout = ({
             <main className="max-w-2xl mx-auto py-12 sm:py-24 px-6">
               {children}
             </main>
-            <Navbar />
           </TooltipProvider>
         </ThemeProvider>
       </body>

@@ -26,34 +26,34 @@ export const DATA = {
   contact: {
     email: 'hi@andostronaut.com',
     tel: '+261329974365',
-    social: {
-      GitHub: {
+    social: [
+      {
+        name: 'Bluesky',
+        url: 'https://dub.sh/1zKla2A',
+        icon: Icons.bluesky,
+      },
+      {
         name: 'GitHub',
         url: 'https://dub.sh/70tsoUD',
         icon: Icons.github,
-        navbar: true,
       },
-      LinkedIn: {
+      {
         name: 'LinkedIn',
         url: 'https://dub.sh/OLcaELQ',
         icon: Icons.linkedin,
-        navbar: true,
       },
-      X: {
+      {
         name: 'X',
         url: 'https://dub.sh/jF9lEEb',
         icon: Icons.x,
-        navbar: true,
       },
-      email: {
+      {
         name: 'Send Email',
         url: 'mailto:hi@andostronaut.com',
         icon: Icons.email,
-        navbar: false,
       },
-    },
+    ],
   },
-
   projects: [
     {
       title: 'Gelda',
