@@ -1,5 +1,5 @@
-import Link from 'next/link'
-import { getBlogPosts } from '@/data/blog'
+import { getBlogPosts, type BlogMetadata } from '@/data/blog'
+import { BlogItem } from '@/components/blog-item'
 
 export const metadata = {
   title: 'Blog',
@@ -11,8 +11,9 @@ export default async function BlogPage() {
 
   return (
     <section>
-      <h1 className="font-medium text-2xl mb-8 tracking-tighter">blog</h1>
-
+      <h1 className="font-medium text-4xl mb-8 tracking-tighter">
+        My thoughts on software development, life, and more.
+      </h1>
       {posts
         .sort((a, b) => {
           if (
@@ -23,18 +24,11 @@ export default async function BlogPage() {
           return 1
         })
         .map((post) => (
-          <Link
+          <BlogItem
             key={post.slug}
-            className="flex flex-col space-y-1 mb-4"
-            href={`/blog/${post.slug}`}
-          >
-            <div className="w-full flex flex-col">
-              <p className="tracking-tight">{post.metadata.title}</p>
-              <p className="h-6 text-xs text-muted-foreground">
-                {post.metadata.publishedAt}
-              </p>
-            </div>
-          </Link>
+            slug={post.slug}
+            metadata={post.metadata as BlogMetadata}
+          />
         ))}
     </section>
   )

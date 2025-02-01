@@ -7,7 +7,7 @@ import remarkParse from 'remark-parse'
 import remarkRehype from 'remark-rehype'
 import { unified } from 'unified'
 
-export type Metadata = {
+export type BlogMetadata = {
   title: string
   publishedAt: string
   summary: string
@@ -37,7 +37,7 @@ export async function markdownToHTML(markdown: string) {
 }
 
 export async function getPost(slug: string) {
-  const filePath = path.join('content', `${slug}.mdx`)
+  const filePath = path.join('blog', `${slug}.mdx`)
   let source = fs.readFileSync(filePath, 'utf-8')
   const { content: rawContent, data: metadata } = matter(source)
   const content = await markdownToHTML(rawContent)
@@ -64,5 +64,5 @@ async function getAllPosts(dir: string) {
 }
 
 export async function getBlogPosts() {
-  return getAllPosts(path.join(process.cwd(), 'content'))
+  return getAllPosts(path.join(process.cwd(), 'blog'))
 }

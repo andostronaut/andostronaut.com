@@ -1,5 +1,3 @@
-import { CodeIcon, HomeIcon } from 'lucide-react'
-
 import { Icons } from '@/components/icons'
 
 export const DATA = {
@@ -9,7 +7,9 @@ export const DATA = {
   url: 'https://andostronaut.com',
   location: 'Antananarivo, MG',
   locationLink: 'https://www.google.com/maps/place/antananarivo',
-  description: 'description',
+  description: `I'm a software developer, open source enthusiast, and community
+    builder. My experience includes leading workshops on AI, showcasing my
+    versatility and commitment to the tech field.`,
   keywords: [
     'Open Source',
     'Developer',
@@ -19,14 +19,22 @@ export const DATA = {
     'Software Developer',
     'Software Engineer',
   ],
-  navbar: [
-    { href: '/', icon: HomeIcon, label: 'Home' },
-    { href: '#', icon: CodeIcon, label: 'Projects' },
+  menus: [
+    {
+      name: 'Home',
+      url: '/',
+      icon: Icons.home,
+    },
+    {
+      name: 'Blog',
+      url: '/blog',
+      icon: Icons.blog,
+    },
   ],
   contact: {
     email: 'hi@andostronaut.com',
     tel: '+261329974365',
-    social: [
+    socials: [
       {
         name: 'Bluesky',
         url: 'https://dub.sh/1zKla2A',
@@ -52,66 +60,9 @@ export const DATA = {
         url: 'mailto:hi@andostronaut.com',
         icon: Icons.email,
       },
-      {
-        name: 'Blog',
-        url: '/blog',
-        icon: Icons.blog,
-      },
     ],
   },
   projects: [
-    {
-      title: 'Gelda',
-      href: '#',
-      dates: '',
-      active: true,
-      description:
-        'Gelda is a revolutionary AI-powered helpdesk assistant designed to provide users with an efficient and personalized support experience.',
-      technologies: [
-        'Next.js',
-        'Typescript',
-        'PostgreSQL',
-        'Drizzle',
-        'TailwindCSS',
-        'Shadcn UI',
-        'Supabase',
-        'Docker',
-      ],
-      links: [
-        {
-          type: 'Source',
-          href: 'https://gelda.kinotio.io',
-          icon: 'Github',
-        },
-      ],
-      image: '/gelda.png',
-      video: '',
-    },
-    {
-      title: 'Drowser Studio',
-      href: '#',
-      dates: '',
-      active: true,
-      description:
-        'Drowser Studio is a robust and intuitive app designed to help users track, visualize, and analyze the performance of various tests over time.',
-      technologies: [
-        'Next.js',
-        'Typescript',
-        'PostgreSQL',
-        'TailwindCSS',
-        'Shadcn UI',
-        'Docker',
-      ],
-      links: [
-        {
-          type: 'Source',
-          href: 'https://drowser.kinotio.io/studio',
-          icon: 'Github',
-        },
-      ],
-      image: '/drowser-studio.png',
-      video: '',
-    },
     {
       title: 'Drowser',
       href: '#',
@@ -127,8 +78,6 @@ export const DATA = {
           icon: 'Github',
         },
       ],
-      image: '/drowser.png',
-      video: '',
     },
     {
       title: 'Cocli',
@@ -137,7 +86,7 @@ export const DATA = {
       active: true,
       description:
         'A ligthweight git commit prompt system to ensure readable and descriptive commit for Deno.',
-      technologies: ['Typescript', 'Deno'],
+      technologies: ['Typescript', 'Deno', 'Git'],
       links: [
         {
           type: 'Source',
@@ -145,8 +94,55 @@ export const DATA = {
           icon: 'Github',
         },
       ],
-      image: '/cocli.gif',
-      video: '',
+    },
+    {
+      title: 'Gelda',
+      href: '#',
+      dates: '',
+      active: true,
+      description:
+        'Gelda is a revolutionary AI-powered helpdesk assistant designed to provide users with an efficient and personalized support experience.',
+      technologies: [
+        'SaaS',
+        'Next.js',
+        'Typescript',
+        'PostgreSQL',
+        'Drizzle',
+        'TailwindCSS',
+        'Shadcn UI',
+        'Supabase',
+      ],
+      links: [
+        {
+          type: 'Website',
+          href: 'https://gelda.kinotio.io',
+          icon: 'Globe',
+        },
+      ],
+    },
+    {
+      title: 'Drowser Studio',
+      href: '#',
+      dates: '',
+      active: true,
+      description:
+        'Drowser Studio is a robust and intuitive app designed to help users track, visualize, and analyze the performance of various tests over time.',
+      technologies: [
+        'SaaS',
+        'Next.js',
+        'Typescript',
+        'PostgreSQL',
+        'TailwindCSS',
+        'Shadcn UI',
+        'PocketBase',
+      ],
+      links: [
+        {
+          type: 'Website',
+          href: 'https://drowser.kinotio.io/studio',
+          icon: 'Globe',
+        },
+      ],
     },
   ],
 }
