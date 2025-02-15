@@ -1,0 +1,105 @@
+---
+title: 'Neovim Setup and AI Configuration'
+publishedAt: '2025-02-15'
+summary: 'Neovim setup and configuration for a better development experience.'
+---
+
+Hey folks! Welcome to my guide on setting up and configuring Neovim using Lua and NvChad. This post will walk you through the necessary steps to get your Neovim environment up and running with a sleek and personalized configuration.
+
+## What is Neovim?
+
+Neovim is a powerful and flexible text editor that provides a wide range of features for developers. It is designed to be highly customizable and extensible, allowing users to tailor the editor to their specific needs.
+
+## Prerequisites
+
+Before you start, make sure you have the following prerequisites installed:
+
+- Neovim (version 0.9.0 or later)
+- Git
+- True Color Terminal like iTerm2 or Alacritty or Ghotty
+- Ripgrep (rg) for searching
+- Xcode Command Line Tools (for compiling Neovim)
+
+## Setting up Neovim and Lua
+
+Because , I'm using MacOS, These are some dependencies that you need to install using Homebrew:
+
+```bash
+brew install node vim neovim tree-sitter git fd ripgrep lazygit lua luajit
+```
+
+Next, you can clone the Neovim configuration repository `nvim-config`:
+
+```bash
+git clone https://github.com/andostronaut/nvim-config.git ~/.config/nvim
+```
+The core configuration used in this is NvChad, which is a Neovim configuration that provides a lot of useful plugins and configurations. 
+
+Using LazyVim as a plugin manager, it makes it easy to install and manage plugins with this command `:Lazy` or `:Lazy sync`.
+
+With the support of Mason, the LSP and Tools is really easy to install and configure. The documentation isreally good and in case you have any issues, you can always refer to the documentation. Some of the command that needs to be executed are `:Mason` and `:MasonToolsInstall`. We don't need to use `:MasonInstall name-of-the-plugin` because it's already configured and installed while you use `:Mason`.
+
+Mason will install commonly used plugins and tools like LSP, formatters, linters, etc.
+
+## AI Configuration
+
+Using some AI tools for code-completion, code-formatting is helpful. For my case, I'm using **Supermaven** and **Github Copilot**. You don't need to worry about the installation of these tools, they are already configured in the configuration file. Just make sure you have an account for these tools.
+
+For **Supermaven**, you need to run these commands in Neovim `:SupermavenUseFree` or `:SupermavenUsePro` to use the free or pro version of the tool.
+
+For **Github Copilot**, you need to run these commands in Neovim `:Copilot setup` to enable the tool.
+
+Some keymaps are already configured for these tools, so you don't need to add any extra keymaps for them.
+
+For **Supermaven**, you can refer to this code snippet or you can update the configuration file to use the keymaps that you want.
+
+In the `init.lua` file, you can find the following code snippet:
+
+```lua
+{
+  "supermaven-inc/supermaven-nvim",
+  lazy = false,
+  config = function()
+    require("supermaven-nvim").setup {
+      keymaps = {
+        -- override default keymaps here
+        accept_suggestion = "<leader>sa",
+        clear_suggestion = "<leader>sc",
+      },
+    }
+  end,
+},
+```
+
+Here for **Supermaven**, I'm using `Space + sa` for accepting the suggestion and `Space + sc` for clearing the suggestion.
+
+For **Github Copilot**, the keymaps are not in the `init.lua` file but in the `mappings.lua` file. You can ajust the keymaps to your liking.
+
+```lua
+M.copilot = {
+  i = {
+    -- override default keymaps here
+    ["<leader>ca"] = {
+      function()
+        vim.fn.feedkeys(vim.fn["copilot#Accept"](), "")
+      end,
+      "Copilot Accept",
+      { replace_keycodes = true, nowait = true, silent = true, expr = true, noremap = true },
+    },
+    -- override default keymaps here
+    ["<leader>cc"] = {
+      function()
+        vim.fn.feedkeys(vim.fn["copilot#Clear"](), "")
+      end,
+      "Copilot Clear",
+      { replace_keycodes = true, nowait = true, silent = true, expr = true, noremap = true },
+    },
+  },
+}
+```
+
+Instead for **Github Copilot**, I'm using `Space + ca` for accepting the suggestion and `Space + cc` for clearing the suggestion.
+
+
+I think that's it for now. I'll update this post with more details and configurations in the future. If you have any questions or suggestions, feel free to reach out to me. I'm happy to help you with your Neovim setup and configuration.
+
