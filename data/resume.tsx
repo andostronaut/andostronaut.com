@@ -1,7 +1,7 @@
 import { Icons } from "@/components/icons";
 
 export const DATA = {
-  name: "Ando RAMANAMIHANTA",
+  name: "Ando Ramanamihanta",
   initials: "AR",
   username: "andostronaut",
   url: "https://andostronaut.com",
