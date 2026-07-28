@@ -74,7 +74,7 @@ export const DATA = {
       links: [
         {
           type: "Source",
-          href: "https://github.com/kinotio/drowser",
+          href: "https://github.com/kinotiodotdev/drowser",
           icon: "Github",
         },
       ],
@@ -114,9 +114,9 @@ export const DATA = {
       ],
       links: [
         {
-          type: "Website",
-          href: "https://mine.kinotio.io",
-          icon: "Globe",
+          type: "Source",
+          href: "https://github.com/kinotiodotdev/mine",
+          icon: "Github",
         },
       ],
     },
@@ -136,9 +136,9 @@ export const DATA = {
       ],
       links: [
         {
-          type: "Website",
-          href: "https://drowser.kinotio.io/studio",
-          icon: "Globe",
+          type: "Source",
+          href: "https://github.com/kinotiodotdev/drowser-studio",
+          icon: "Github",
         },
       ],
     },
