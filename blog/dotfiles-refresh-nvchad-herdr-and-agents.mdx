@@ -1,0 +1,239 @@
+---
+title: 'Dotfiles Refresh: NvChad v2.5, Herdr and Agents'
+publishedAt: '2026-07-28'
+summary: 'A pass over my dotfiles: Neovim rebuilt on NvChad v2.5, Herdr as an agent-aware multiplexer, and Zed wired to ACP agent servers.'
+---
+
+Hey folks! It's been a while since I wrote about my [Neovim setup](/blog/neovim-setup-and-ai-configuration), and my [dotfiles](https://github.com/andostronaut/dotfiles) have moved on quite a bit since then. This post walks through what changed and, more importantly, *why* — the reasoning is usually the part that's missing when you read someone else's config.
+
+## What changed
+
+- **Neovim** rebuilt on NvChad **v2.5**, from the official starter template. The old v2.0 config is gone, along with ~2300 lines of vendored code.
+- **[Herdr](https://herdr.dev/)** added as a mouse-first, agent-aware terminal multiplexer.
+- **Zed** wired up to ACP agent servers, with a panel layout that keeps the agent and the code from fighting over the same side of the screen.
+- **Ghostty** config documented, and switched to a theme that follows the system appearance.
+- **Editor extensions** trimmed and updated.
+
+## NvChad v2.5: from a fork to a layer
+
+This was the big one. My old config was NvChad v2.0 with the framework's own `lua/core/` and `lua/plugins/configs/` directories copied straight into my repo. It worked for a long time, and then it didn't: on Neovim 0.12 it stopped bootstrapping entirely. `base46` was never compiled, so every launch died with `E5113: cannot open .../base46/defaults`.
+
+Underneath that, the config had quietly drifted from upstream. My mason list was still asking for `tsserver` and `volar`, which lspconfig had renamed to `ts_ls` and `vue_ls`. It also asked for `dartls` and `rustfmt`, neither of which mason can install — `dartls` ships inside the Dart SDK, `rustfmt` comes from rustup.
+
+That's the real cost of vendoring a framework: you own the framework's code, so you inherit the job of keeping it in sync, and it fails silently until it doesn't.
+
+So the new config starts from [NvChad/starter](https://github.com/NvChad/starter), and NvChad itself is just a plugin pinned to a branch:
+
+```lua
+require("lazy").setup({
+  {
+    "NvChad/NvChad",
+    lazy = false,
+    branch = "v2.5",
+    import = "nvchad.plugins",
+  },
+
+  { import = "plugins" },
+}, lazy_config)
+```
+
+That's the whole idea. NvChad is a dependency now, not a thing I maintain. My repo only carries the layer on top of it: `lua/chadrc.lua` for the UI, `lua/plugins/init.lua` for my plugin set, and `lua/configs/` for the per-tool configuration.
+
+### One file as the source of truth for tooling
+
+The drift problem was worth fixing properly, not just correcting the names once. The trap is that mason deals in two different namespaces that *look* like one: lspconfig server names, and mason package names. `ts_ls` is a server, `prettier` is a package, and mixing them into a single list is how you end up with an install that half-fails.
+
+So both lists live in one file, `lua/configs/servers.lua`, clearly separated:
+
+```lua
+local M = {}
+
+-- installed by mason, enabled by lspconfig
+M.lsp = {
+  "cssls", "denols", "gopls", "html", "lua_ls",
+  "pyright", "rust_analyzer", "tailwindcss", "ts_ls", "vue_ls",
+  -- ...
+}
+
+-- enabled if the binary is on PATH, but not installable through mason
+-- because the server ships as part of its own toolchain
+M.lsp_external = {
+  "dartls", -- ships with the Dart SDK
+}
+
+-- formatters and linters, mason package names
+M.tools = {
+  "black", "eslint_d", "gofumpt", "prettier", "stylua", "yamllint",
+  -- rustfmt is deliberately absent, it comes from rustup not mason
+  -- ...
+}
+
+return M
+```
+
+Everything else reads from it — `mason-lspconfig` takes `servers.lsp`, `mason-tool-installer` takes `servers.tools`, and `configs/lspconfig.lua` enables both `lsp` and `lsp_external`. Adding a language is a one-line edit in one place.
+
+### LSP overrides with the new API
+
+v2.5 also means the modern `vim.lsp.config()` API. NvChad's `defaults()` already registers capabilities, `on_init` and the `LspAttach` keymaps, so my file is only the per-server overrides on top.
+
+My favourite one to finally do cleanly is the Deno/TypeScript conflict. Both servers claim `javascript` and `typescript`, so they'd both attach and you'd get every diagnostic twice. I used to solve this with `deno-nvim`, which killed `tsserver` by hand. Now it's just root markers:
+
+```lua
+vim.lsp.config("denols", {
+  root_markers = { "deno.json", "deno.jsonc" },
+  workspace_required = true,
+})
+
+vim.lsp.config("ts_ls", {
+  root_markers = { "package.json", "tsconfig.json", "jsconfig.json" },
+  workspace_required = true,
+})
+```
+
+Each server only attaches in a project that actually looks like its kind of project. No plugin, no manual stopping.
+
+A couple of other overrides earning their place: `svelte` doesn't watch JS/TS files itself so it has to be notified they changed, and `yamlls` gets diagnostics disabled on Helm charts, since templated YAML is invalid YAML and the noise is constant.
+
+### Install and post-install
+
+```sh
+brew install --cask ghostty
+
+brew install node vim neovim tree-sitter-cli git fd ripgrep lazygit lua luajit
+
+ln -s $(pwd)/.config/nvim ~/.config/nvim
+
+nvim
+```
+
+Two things here that cost me time, so they're now written down in the README:
+
+> Install `tree-sitter-cli`, not `tree-sitter`. The `tree-sitter` formula is the parsing *library*; the binary that nvim-treesitter shells out to comes from `tree-sitter-cli`.
+
+> **NvChad v2.5 has no `:MasonInstallAll`.** It was removed, but the NvChad docs still mention it. Use `:Mason` and press `i` on a package, or `:MasonInstall <package>`.
+
+After the first launch, `:Lazy sync` for plugins and `:TSInstallAll` for the treesitter parsers, and you have a working editor.
+
+### If the theme cache never compiles
+
+Worth calling out because the error message points nowhere near the cause. If you hit `E5113: cannot open .../base46/defaults` on startup, it's usually leftover state from another Neovim distro — an existing `lazy.nvim` in the shared data directory makes the bootstrap skip itself. Clear all three directories, not just `share`:
+
+```sh
+rm -rf ~/.local/share/nvim ~/.local/state/nvim ~/.cache/nvim
+
+nvim
+```
+
+## Herdr: a multiplexer that knows about agents
+
+I've used tmux for years and my `.tmux.conf` isn't going anywhere. But most of my terminal time now involves background AI agents, and tmux has no idea those exist — a pane is a pane, so you end up manually checking which agent finished and which one is sitting there waiting for input.
+
+[Herdr](https://herdr.dev/) is built for exactly that. It detects agents in panes, labels them, sorts them in a sidebar, and notifies you when one changes state.
+
+```sh
+brew install herdr
+
+mkdir -p ~/.config/herdr
+ln -sf $(pwd)/.config/herdr/config.toml ~/.config/herdr/config.toml
+```
+
+Note the symlink is the **file**, not the directory. Herdr keeps its logs, sockets and `session.json` in `~/.config/herdr`, so symlinking the whole folder would drag runtime state into your dotfiles repo.
+
+It runs fine with no config at all, so everything in mine is optional. The parts that matter most:
+
+```toml
+[theme]
+name = "kanagawa"
+
+[keys]
+prefix = "ctrl+b"
+
+# Get pinged when a background agent finishes or needs input.
+# delivery: off | herdr | terminal | system
+[ui.toast]
+delivery      = "herdr"
+delay_seconds = 1   # only fires if still in that state after the delay
+
+[ui.sound]
+enabled = true
+
+[session]
+resume_agents_on_restore = true
+
+[worktrees]
+directory = "~/.herdr/worktrees"
+```
+
+The `delay_seconds = 1` is a small thing that makes a big difference: an agent that flickers into "waiting" and immediately resolves doesn't earn a notification. And `resume_agents_on_restore` means restoring a session brings the agent panes back into their native sessions rather than into dead shells.
+
+I also pinned the sidebar width by setting `sidebar_width`, `sidebar_min_width` and `sidebar_max_width` all to `40`. It auto-scales to workspace-name length by default, and I'd rather it not move.
+
+Reload a running server after edits with `prefix+shift+r`, and print the full commented defaults anytime with `herdr --default-config`.
+
+## Zed: ACP agent servers
+
+Zed can talk to external agents over ACP, which means the agent panel isn't limited to whatever's built in. Two registry entries, and Claude Code and Codex both show up as first-class agents:
+
+```json
+"agent_servers": {
+  "codex-acp": {
+    "type": "registry"
+  },
+  "claude-acp": {
+    "default_config_options": {
+      "model": "opus[1m]",
+      "effort": "max"
+    },
+    "type": "registry"
+  }
+}
+```
+
+The `default_config_options` on `claude-acp` is the useful bit — model and reasoning effort get set once in the config instead of being picked in the UI every session.
+
+The other half of this change was the panel layout, which sounds cosmetic but isn't. Once you're pairing with an agent, the agent panel is where you're *reading*, and it needs real space:
+
+```json
+"agent": {
+  "sidebar_side": "left",
+  "dock": "left",
+  "flexible": true,
+  "play_sound_when_agent_done": "always",
+  "expand_edit_card": false,
+  "expand_terminal_card": false
+}
+```
+
+So the agent, terminal and debugger all dock **left**, and everything I use for navigation — project panel, outline, git, collaboration — docks **right** at a consistent `300` width. The agent gets one whole side of the window, my file tree stops jumping around between projects, and `play_sound_when_agent_done` means I can look away.
+
+`expand_edit_card` and `expand_terminal_card` are off on purpose: when an agent makes twelve edits I want a readable list of them, not twelve expanded diffs to scroll past.
+
+## Ghostty: light and dark in one line
+
+Small config, but two lines earn their keep:
+
+```
+theme = dark:Builtin Dark,light:Builtin Light
+window-save-state = always
+font-size = 12
+macos-icon = xray
+```
+
+The `theme` line takes a light and a dark theme and follows the system appearance, so the terminal changes with everything else instead of being the one blinding window at night. I also went through and added the full comment header from Ghostty's own template, since `ghostty +show-config --default --docs` is easier to remember when it's written at the top of the file you're already looking at.
+
+## Extensions
+
+Nothing dramatic — added `anthropic.claude-code` and `biomejs.biome`, dropped a few I'd stopped opening. The install is still one command:
+
+```sh
+cat .config/cursor/extensions.list | xargs -L 1 code --install-extension
+```
+
+Biome replacing separate formatter and linter setups has been the nicest of those, and it lines up with what I already run in CI on my own projects.
+
+## Wrapping up
+
+The theme across all of this, looking back at it: **stop vendoring things you don't want to maintain, and give agents real space in the setup instead of squeezing them into a corner.** Neovim went from a fork to a thin layer, tooling names live in exactly one file, and both the multiplexer and the editor now treat a running agent as something with a state worth reporting.
+
+Everything is in the [dotfiles repo](https://github.com/andostronaut/dotfiles), and the README has the full per-tool setup steps. If you try any of it and something doesn't work, reach out — the troubleshooting sections exist because I hit those problems first.
