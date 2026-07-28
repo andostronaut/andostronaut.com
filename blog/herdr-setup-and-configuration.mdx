@@ -1,0 +1,194 @@
+---
+title: 'Herdr Setup and Configuration'
+publishedAt: '2026-07-28'
+summary: 'Setting up Herdr, an agent-aware terminal multiplexer, and a walkthrough of every option I changed from the defaults.'
+---
+
+Hey folks! I mentioned [Herdr](https://herdr.dev/) briefly in my [dotfiles refresh](/blog/dotfiles-refresh-nvchad-herdr-and-agents) post, but it deserves its own writeup. This is the full setup, plus the reasoning behind every option I moved off its default — because a config you copied without understanding is a config you can't debug later.
+
+## The problem it solves
+
+I've used tmux for years. My `.tmux.conf` is tuned, it has `resurrect` and `continuum` restoring sessions after a reboot, and I'm not throwing it away.
+
+But my terminal time changed shape. On a normal day I have three or four AI agents running in different panes — one refactoring, one writing tests, one chewing through a migration. And tmux has no concept of any of that. A pane is a pane. So the loop becomes: cycle through panes, squint at each one, work out which agent finished, which one is blocked waiting for input, and which is still thinking. You end up **polling your own terminal**.
+
+Herdr is a mouse-first multiplexer built around exactly that gap. It detects which agent is running in a pane, labels it, sorts them in a sidebar, and tells you when one changes state. The agent stops being something you supervise and becomes something that reports in.
+
+## Install
+
+```sh
+brew install herdr
+```
+
+Then symlink the config into place:
+
+```sh
+mkdir -p ~/.config/herdr
+ln -sf $(pwd)/.config/herdr/config.toml ~/.config/herdr/config.toml
+```
+
+Note that's the **file**, not the directory. This is the one setup gotcha worth calling out: Herdr keeps its logs, sockets and `session.json` in `~/.config/herdr`, right alongside the config. Symlink the whole folder the way you would for Neovim or Zed, and you'll drag live runtime state into your dotfiles repo — sockets and a session file that change every few seconds and mean nothing on another machine.
+
+Two commands worth knowing before you start editing anything:
+
+- `herdr --default-config` prints the full commented defaults.
+- `herdr server reload-config` (or `prefix+shift+r`) reloads a running server after edits.
+
+Herdr runs perfectly well with **no config at all**. Everything below is optional, which is why my config file annotates each value with the default it's overriding.
+
+## Theme
+
+```toml
+[theme]
+name = "kanagawa"
+auto_switch = false
+# light_name = "catppuccin-latte"
+# dark_name  = "catppuccin"
+```
+
+Built-in themes include `kanagawa`, `catppuccin`, `catppuccin-latte`, `tokyo-night`, `nord` and `dracula`. There's also a special `terminal` theme that just follows your host terminal's ANSI palette, which is the right answer if you've already got a palette you like and don't want a second source of truth.
+
+`auto_switch` follows the host terminal's light/dark appearance and swaps theme automatically, falling back to the theme's own light/dark sibling if you don't set `light_name` and `dark_name`. I have this **off**, which is worth explaining since I turned the equivalent *on* in Ghostty. Ghostty is my whole screen and I want it to follow the system at dusk. Herdr's panes are usually full of agent output I'm reading closely, and a theme swapping underneath that is a distraction, not a comfort. One thing to know: manually picking a theme in Settings disables `auto_switch` anyway.
+
+## Keybindings
+
+```toml
+[keys]
+prefix = "ctrl+b"
+```
+
+That's the only key I set, and I set it to its own default — deliberately. My tmux prefix is `ctrl+a`. Keeping Herdr on `ctrl+b` means the two multiplexers never fight over the same chord, and my hands know which one I'm in by which prefix works. If you'd rather bring tmux muscle memory across wholesale, set `prefix = "ctrl+a"` and you're done.
+
+Everything else stays default. Unlisted keys keep their bindings, so the config only needs to carry what you actually changed. The ones I use constantly:
+
+- `prefix+v` — split side by side
+- `prefix+minus` — split stacked
+- `prefix+c` — new tab
+- `prefix+z` — zoom the current pane
+- `prefix+b` — toggle the sidebar
+- `prefix+shift+r` — reload config
+- `prefix+shift+g` — new worktree (more on this below)
+
+## The sidebar
+
+```toml
+[ui]
+sidebar_width          = 40
+sidebar_min_width      = 40
+sidebar_max_width      = 40
+sidebar_collapsed_mode = "compact"
+agent_panel_sort       = "spaces"
+show_agent_labels_on_pane_borders = true
+```
+
+Setting all three width keys to the same number is the trick here. By default the sidebar auto-scales to the length of your workspace names (floor `18`, ceiling `36`), which sounds helpful and in practice means the sidebar changes width when you switch projects and everything to the right of it shifts. When `min == width == max`, it's pinned. I picked `40` because it's above the default ceiling and fits my longer repo names without truncating.
+
+`show_agent_labels_on_pane_borders` is the small feature that does the most work. With four panes open, the border of each one tells you which agent is in it. No clicking through to find out.
+
+`agent_panel_sort = "spaces"` keeps the Agent sidebar grouped by workspace rather than by priority — I want "everything happening in this repo" together, since that's how I think about the work.
+
+The rest of the UI block is mostly me writing down defaults I agree with, so future-me doesn't wonder whether they were considered:
+
+```toml
+mouse_capture  = true    # herdr is mouse-first; keep this on
+copy_on_select = true
+confirm_close  = true
+pane_borders   = true
+pane_gaps      = true
+accent         = "cyan"
+```
+
+## Notifications, and the one-second rule
+
+This is the section that changed my workflow the most.
+
+```toml
+[ui.toast]
+delivery      = "herdr"
+delay_seconds = 1
+
+[ui.toast.clipboard]
+enabled = true
+```
+
+`delivery` takes `off`, `herdr` (in-app toast), `terminal`, or `system` (the OS notifier). I use the in-app toast. System notifications sound appealing until you have four agents changing state all afternoon and macOS starts stacking banners over whatever you're actually doing.
+
+`delay_seconds` is the setting I'd most encourage you to steal. It accepts anything from 0 to 3600, and it only fires the notification **if the pane is still in that state after the delay**. Set to `1`, an agent that flickers into "waiting" and immediately resolves itself never interrupts you. Without it, the signal-to-noise ratio of the notifications collapses and you start ignoring them — which defeats the entire point of running an agent-aware multiplexer.
+
+Sound works the same way, with per-agent overrides:
+
+```toml
+[ui.sound]
+enabled = true
+
+[ui.sound.agents]
+claude = "default"
+codex  = "default"
+# droid defaults to off
+```
+
+Each agent takes `default`, `on` or `off`, so you can mute a chatty one without going silent everywhere. You can also override the sounds themselves via `path`, or per-event with `done_path` and `request_path`.
+
+## Sessions and worktrees
+
+```toml
+[session]
+resume_agents_on_restore = true
+
+[worktrees]
+directory = "~/.herdr/worktrees"
+```
+
+`resume_agents_on_restore` is the difference between a session restore that's useful and one that's theatre. With it on, restoring brings agent panes back into their **native sessions** — the agent picks up its own context — instead of just reopening a dead shell where an agent used to be.
+
+The worktree support is the part I didn't expect to like as much as I do. `prefix+shift+g` creates a new git worktree and checks it out under `<repo>/<branch-slug>` inside the configured directory. Once you're running multiple agents at once, this stops being a nicety: two agents editing the same working tree will trip over each other, and giving each one its own checkout makes parallel work actually parallel instead of a merge conflict you generated on purpose.
+
+Keeping them under `~/.herdr/worktrees` rather than next to the repo also means my project directories stay clean and nothing accidentally gets indexed twice by an editor.
+
+## Remote, scrollback and the experimental block
+
+Three smaller things I set.
+
+```toml
+[remote]
+manage_ssh_config = true
+```
+
+This lets Herdr add keepalive and connection-reuse settings for `herdr --remote`. Reusing the connection is what makes a remote session feel local rather than like typing through treacle.
+
+```toml
+[advanced]
+scrollback_limit_bytes = 10000000   # ~10 MB per pane
+```
+
+Ten megabytes of scrollback per pane sounds excessive right up until you're running agents. A long agent session produces a genuinely enormous amount of output, and the moment you want to scroll back to find what it did forty minutes ago is exactly the moment a small buffer will have thrown it away.
+
+```toml
+[experimental]
+allow_nested   = false
+kitty_graphics = false
+pane_history   = false
+```
+
+All three off, on purpose. `allow_nested` would let me launch Herdr inside a Herdr pane, and given I still run tmux I'd rather not add a third layer of prefix keys to reason about. `pane_history` persists pane screen history to `session-history.json` — appealing, but it's experimental and writing all that agent output to disk isn't something I want happening silently. I'll revisit both when they graduate.
+
+I also keep updates on the stable channel, with the background checks on:
+
+```toml
+[update]
+channel        = "stable"
+version_check  = true
+manifest_check = true
+```
+
+`manifest_check` is the interesting one — it's not checking for Herdr releases, it's checking for updates to the **agent-detection manifest**. That's the data that lets Herdr recognise which agent is running in a pane, and new agents and CLI versions appear constantly. Turn it off and detection quietly rots.
+
+## So does it replace tmux?
+
+Not for me, no. They've settled into different jobs.
+
+Herdr is where interactive work happens — the agents, the worktrees, the things I'm actively watching. tmux is still what I reach for on servers and long-lived remote sessions, where `resurrect` and `continuum` restoring everything after a reboot matters more than knowing what an agent is doing. Different prefixes, different purposes, no conflict.
+
+The config is in my [dotfiles](https://github.com/andostronaut/dotfiles) at `.config/herdr/config.toml`, fully commented with the default noted next to every value I changed. Clone it, or read it and take the three or four settings that apply to how you work — `delay_seconds`, the pinned sidebar and `resume_agents_on_restore` are the ones I'd fight to keep.
+
+If you try it and hit something I didn't cover, reach out. Happy to help.
