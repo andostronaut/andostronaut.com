@@ -1,0 +1,321 @@
+---
+title: 'Herdr Plugins, Ghostty and Git in Neovim'
+publishedAt: '2026-08-05'
+summary: 'Another pass over the terminal: herdr plugins pinned with herdr-lazy, a git layer in Neovim, inline images through Ghostty, and one theme across all three.'
+---
+
+Hey folks! I wrote about [rebuilding my dotfiles](/blog/dotfiles-refresh-nvchad-herdr-and-agents) and then about [configuring Herdr](/blog/herdr-setup-and-configuration) properly. Both of those were about getting the foundations right. This one is about what I've added on top since: plugins, keybinds and the small settings that only reveal themselves once you've used a setup for a few weeks.
+
+## What changed
+
+- **Herdr** grew a plugin layer, managed declaratively with `herdr-lazy` and pinned in a lockfile.
+- **Ghostty** moved under `.config/ghostty`, picked up a dropdown terminal, and now renders images inline in Neovim.
+- **Neovim** got a real git layer — hunks, blame, diffs, history — plus visible dotfiles and inline images.
+- **One theme** across all three, after a detour that's worth telling.
+- **`install.sh`** rewritten to symlink per entry instead of clobbering `~/.config`.
+
+## The theme detour
+
+Start with the mistake, since it's the most useful part.
+
+I was on GitHub Dark in Neovim and GitHub's light/dark pair in Ghostty. Fine, but three tools were dressed three different ways. So I moved everything to Catppuccin — Mocha at night, Latte during the day, following the macOS appearance.
+
+Ghostty does that in one line. Herdr does it in three:
+
+```toml
+[theme]
+name = "catppuccin"
+auto_switch = true
+light_name = "catppuccin-latte"
+dark_name  = "catppuccin"
+```
+
+Neovim does not. NvChad's `base46` has no notion of the OS appearance — `theme_toggle` is a manual keybind. So I wrote an autocmd that shells out to `defaults read -g AppleInterfaceStyle` on `VimEnter` and `FocusGained`, works out light or dark, and recompiles the highlights.
+
+It worked. It was also about fifty lines, and half of them existed to work around one thing: `base46` compiles highlights into a cache that records nothing about which theme produced it. So the cache silently drifts from the theme your config declares, and there's no way to ask "what's actually on screen right now?" I ended up writing my own marker file next to the cache purely so I could skip the ~35ms rebuild when nothing had changed.
+
+Then I switched to **Vesper** and deleted all of it.
+
+```lua
+M.base46 = {
+	theme = "vesper",
+}
+```
+
+```toml
+[theme]
+name = "vesper"
+# vesper is dark only, so there is nothing to switch to.
+auto_switch = false
+```
+
+```
+theme = Vesper
+```
+
+Vesper is dark only. Nothing to sync, nothing to detect, nothing to cache. Fifty lines of machinery existed to solve a problem I stopped having by picking a different theme — and I only found that out by building the machinery first. I'd rather that than the reverse, but it's a good reminder that "how do I make this work?" and "do I need this to work?" are different questions, and the second one is cheaper to answer.
+
+## Herdr plugins
+
+Herdr has a plugin system, and it's the thing that's changed my day-to-day most since the last post.
+
+My first attempt was a 92-line shell script that reinstalled everything from a hardcoded list. It lasted about half a day, because `herdr-lazy` already does that job properly: a plugin set declared in a file, resolved to commits in a lockfile.
+
+```
+gecm0/herdr-plugin-agents-usage
+rjyo/herdr-window-title-sync
+senna-lang/herdr-agent-usage
+natori-hrj/herdr-lazy
+persiyanov/herdr-reviewr
+Davidcreador/herdr-token-dashboard
+alexarthurs/herdr-sidebar/plugins/herdr-sidebar
+jmarbutt/herdr-spaces-pr-status
+```
+
+That's `plugins.list`. Next to it, `plugins.lock` records `owner/repo@commit` for each one, taken from Herdr's own `source.resolved_commit`, so `herdr-lazy sync` on a new machine reproduces exactly what I'm running rather than whatever `main` looks like that day. Both files are tracked and symlinked; the script is gone.
+
+What each one does:
+
+- **agents-usage** and **usagebar** — provider usage and rate limits, one as a modal, one as live meters in the sidebar.
+- **token-dashboard** — usage over time, in its own tab.
+- **reviewr** — comment on an agent's diff and send the comments back to it.
+- **herdr-sidebar** — a VS Code style file explorer plus source control, docked left.
+- **spaces-pr-status** — GitHub PR state next to each space.
+- **window-title-sync** — keeps the terminal title in step with the pane.
+
+### Sidebar rows
+
+The part I didn't expect: plugins publish `$`-tokens that you compose into the sidebar yourself.
+
+```toml
+[ui.sidebar.agents]
+row_gap = 0
+rows = [
+  ["state_icon", "$title"],
+  ["$provider", "$limit"],
+  ["$context"],
+]
+
+[ui.sidebar.spaces]
+row_gap = 0
+rows = [
+  ["state_icon", "workspace"],
+  ["branch", "git_status"],
+  ["$pr", "$pr_checks", "$pr_review"],
+]
+```
+
+Herdr's defaults are `[["state_icon", "workspace", "tab"], ["agent"]]`. Mine replace that with what I actually want to know without clicking: which provider a pane is on, how much of the shortest limit window is left, how much context it's burned. And for spaces — branch, dirty state, and the PR's glyph, checks and review status.
+
+That last row is `spaces-pr-status`, and it means the sidebar answers "is that PR green yet?" without me opening a browser. A full row is about 32 columns, which is why the sidebar is pinned at 40 and why I stayed on the compact glyph style — the emoji variant is double-width and overflows.
+
+One design detail worth stealing: those tokens carry a TTL of four poll intervals. If the poller dies, the row goes **blank** rather than showing you a stale green tick. A blank `$pr` means no data, not no PR.
+
+### Keybinds, and two gotchas
+
+Everything got a binding, documented in [`herdr-keybinds.md`](https://github.com/andostronaut/dotfiles/blob/main/herdr-keybinds.md) in the repo. The prefix also moved:
+
+```toml
+[keys]
+prefix = "ctrl+space"     # default is ctrl+b
+```
+
+I wanted a double-tap prefix and it isn't possible — Herdr's grammar is one key plus modifiers, no sequence syntax. `space` alone validates but is unusable, since the prefix key gets consumed entering prefix mode and you'd never type a space again.
+
+There are two binding types, and the difference matters:
+
+```toml
+# a real action the plugin registers
+[[keys.command]]
+key = "prefix+shift+v"
+type = "plugin_action"
+command = "persiyanov.reviewr.toggle"
+description = "reviewr: toggle review pane"
+
+# the CLI, for when the action won't do what you want
+[[keys.command]]
+key = "prefix+shift+u"
+type = "shell"
+command = "herdr plugin pane open --plugin usagebar --entrypoint limits --placement split --direction down --focus"
+description = "Agent Usage: open limits pane below"
+```
+
+`plugin_action` is the normal case. I dropped to `shell` twice: agents-usage exposes its modal as a *pane entrypoint* rather than an action, so there's nothing to bind; and usagebar's own `open-limits` hardcodes `--direction right`, when I want the pane below.
+
+**Gotcha one:** action ids rarely match repo names. `senna-lang/herdr-agent-usage` registers as `usagebar`, `Davidcreador/herdr-token-dashboard` as `dave.token-dashboard`. Run `herdr plugin action list` and use what it prints. Plugins with Windows support also register `-windows` variants — bind the plain id on macOS, because Herdr accepts the wrong one in the config and only refuses it at the keypress. The symptom is a key that silently does nothing.
+
+**Gotcha two:** plugins with a background poller start via a `[[startup]]` manifest hook, and Herdr only runs those when the **server** starts. Install one into a running server and it sits there dead — sidebar tokens blank, looks broken, isn't. Either restart, or start it by hand:
+
+```sh
+cd ~/.config/herdr/plugins/github/<plugin-dir> && node bin/startup.js
+herdr api snapshot
+```
+
+Validate before you reload, either way:
+
+```sh
+herdr config check             # validates without applying
+herdr server reload-config     # or prefix+shift+r
+```
+
+## Ghostty
+
+The config moved from a loose `ghostty-config.txt` at the repo root into `.config/ghostty/config`, where it can be symlinked like everything else. Three settings earn their place:
+
+```
+# Notify when a long command finishes in a tab I'm not looking at
+notify-on-command-finish = unfocused
+
+# Dropdown terminal, ctrl+cmd+` from anywhere (needs Accessibility permission)
+quick-terminal-position = top
+keybind = global:ctrl+cmd+grave_accent=toggle_quick_terminal
+
+scrollback-limit = 100000000
+```
+
+`notify-on-command-finish = unfocused` is the same idea as Herdr's toast `delay_seconds` — only tell me when I'm not already looking. The quick terminal is a global hotkey dropdown for the thirty-second tasks that don't deserve a tab; it needs Accessibility permission to work from other apps.
+
+The scrollback limit is large for the same reason Herdr's is: agent output is enormous, and the moment you want to scroll back forty minutes is exactly the moment a small buffer will have dropped it.
+
+## Neovim
+
+### Inline images
+
+Ghostty speaks the Kitty graphics protocol, which means Neovim can render images inline. `snacks.nvim` has a module for it:
+
+```lua
+{
+  "folke/snacks.nvim",
+  lazy = false,
+  priority = 1000,
+  opts = {
+    image = { enabled = true },
+  },
+},
+```
+
+Only the image module is on; the rest of snacks stays dormant. It needs the `imagemagick` CLI on `PATH` or it renders nothing at all, silently — so that went into the Brewfile with a comment saying exactly that.
+
+### A git layer
+
+NvChad ships gitsigns but only maps `<leader>cm` and `<leader>gt`, so everything below `<leader>g` was free. I gave it hunks from gitsigns, files and history from diffview, and blame from git-blame.nvim:
+
+```lua
+-- hunk level, gitsigns
+map("n", "]h", gs("nav_hunk", "next"), { desc = "git next hunk" })
+map("n", "[h", gs("nav_hunk", "prev"), { desc = "git prev hunk" })
+map("n", "<leader>gp", gs "preview_hunk", { desc = "git preview hunk" })
+map("n", "<leader>gs", gs "stage_hunk", { desc = "git stage hunk" })
+map("n", "<leader>gr", gs "reset_hunk", { desc = "git reset hunk" })
+
+-- file and repo level, diffview
+map("n", "<leader>gd", "<cmd>DiffviewOpen<cr>", { desc = "git diff working tree" })
+map("n", "<leader>gf", "<cmd>DiffviewFileHistory %<cr>", { desc = "git history current file" })
+map("n", "<leader>gl", "<cmd>Flog<cr>", { desc = "git commit graph" })
+```
+
+Inline blame stays off until I ask for it, with output short enough to sit at the end of a line — the default `%c` timestamp is a full C-locale date, which is absurd there:
+
+```lua
+{
+  "f-person/git-blame.nvim",
+  opts = {
+    enabled = false,          -- toggle with <leader>gB
+    date_format = "%r",       -- relative, "3 days ago"
+    message_template = "  <author> • <date> • <summary>",
+    message_when_not_committed = "  uncommitted",
+  },
+},
+```
+
+Then two collisions, both worth knowing if you run more than one git plugin.
+
+`git.nvim` and `fugitive` **both define `:Git`**, and `git.nvim`'s `setup()` creates it unconditionally, so whichever loads last wins — which under lazy loading means it depends on the day. The fix is to force the order:
+
+```lua
+{
+  "dinhhuy258/git.nvim",
+  lazy = false,
+  priority = 1000,
+  opts = {
+    -- git.nvim's defaults claim <Leader>gb/gd/gD/gp/gr, all of which
+    -- mappings.lua points at gitsigns and diffview instead
+    default_mappings = false,
+  },
+},
+
+{
+  "tpope/vim-fugitive",
+  lazy = false,
+},
+```
+
+`git.nvim` loads first at high priority, then fugitive's `command!` lands on top. `:Git` is fugitive, and `git.nvim` keeps its own `Git`-prefixed commands. And its default mappings claim five of the `<leader>g` keys I'd just pointed at gitsigns and diffview, hence `default_mappings = false`.
+
+Neither of those announces itself. You just get a `:Git` that does something different than you expected, and mappings that quietly aren't yours.
+
+### Show me the files
+
+Both nvim-tree and telescope hide things by default, and both hide them *helpfully*, which is worse than hiding them obviously:
+
+```lua
+{
+  "nvim-tree/nvim-tree.lua",
+  opts = {
+    filters = { git_ignored = false, dotfiles = false },
+  },
+},
+
+{
+  "nvim-telescope/telescope.nvim",
+  opts = {
+    pickers = {
+      find_files = { hidden = true, no_ignore = true },
+      live_grep = {
+        additional_args = function()
+          return { "--hidden", "--no-ignore" }
+        end,
+      },
+    },
+  },
+},
+```
+
+nvim-tree filters gitignored paths, so `.env`, `dist` and `node_modules` vanish. Telescope shells out to `fd` and `rg`, which skip hidden files and honour `.gitignore`. In a **dotfiles** repo — where nearly everything starts with a dot — that's the difference between a file picker and an empty list.
+
+I also dropped the Ruby tooling: solargraph, rubyfmt and the Ruby treesitter parser. The stack here is Rust, Go and TS/JS with React and Vue, and none of it had been used in a year.
+
+## install.sh
+
+The old script copied a whole `.config` directory into place, which meant it owned every tool that keeps config there — including ones not in the repo. The rewrite links per entry:
+
+```sh
+config_dirs=(cursor ghostty nvim terminalizer vscode zed)
+
+config_files=(
+  herdr/config.toml
+  herdr/plugins/config/herdr-lazy/plugins.list
+  herdr/plugins/config/herdr-lazy/plugins.lock
+)
+```
+
+The rule that decides which list an entry goes in: **link the directory when the repo owns every file under it, link the file when the app also writes live state there.** Herdr keeps logs, sockets, `session.json` and installed plugins next to its config — link the directory and you drag all of it into version control, which is exactly the trap I flagged in the [Herdr post](/blog/herdr-setup-and-configuration).
+
+Everything is symlinked, never copied, so an edit in the repo takes effect immediately and an app rewriting its own config shows up as a dirty file. Anything already at the destination gets moved into a timestamped backup first, and `--dry-run` prints the plan without touching anything.
+
+It only does config, though, so the script now says what comes next:
+
+```sh
+brew bundle --file Brewfile     # packages, incl. imagemagick for snacks.nvim
+herdr-lazy sync                 # herdr plugins, at the commits in plugins.lock
+```
+
+With one prerequisite that cost me a confusing ten minutes: `herdr-lazy sync` builds plugins from source and several are Rust. `herdr-lazy` and `herdr-sidebar` need edition 2024, so rustup's stable toolchain has to be 1.85 or newer or the build fails with ``feature `edition2024` is required``. `rustup update stable` and it goes away — but nothing in the error points at your toolchain being old.
+
+## Wrapping up
+
+Reading it back, the connecting thread is **make the tools report state instead of making me go look for it.** PR status in the sidebar, usage meters next to each agent, a notification when a command finishes in a tab I'm not watching, blame on demand rather than always-on. And where that isn't possible, write down the reason — half the comments in these configs exist because the failure was silent the first time.
+
+The other half of the lesson is the theme detour. Fifty lines of cache-marker machinery, deleted by choosing a dark-only theme. Worth remembering next time something is hard to configure.
+
+It's all in the [dotfiles repo](https://github.com/andostronaut/dotfiles). If you try any of it and something doesn't work, reach out — the gotchas above are written down because I hit each one first.
